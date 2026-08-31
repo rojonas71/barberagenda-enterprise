@@ -46,3 +46,13 @@
   for = "/manifest.webmanifest"
   [headers.values]
     Cache-Control = "public, max-age=3600"
+
+
+Config file:
+/opt/build/repo/netlify.toml
+
+Build command:
+npm run build:production
+
+Publish:
+dist
