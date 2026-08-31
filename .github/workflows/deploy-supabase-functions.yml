@@ -1,0 +1,43 @@
+name: Deploy Supabase Edge Functions
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/functions/**'
+      - '.github/workflows/deploy-supabase-functions.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supabase-functions-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_REF }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v2
+        with:
+          version: latest
+          github-token: ${{ github.token }}
+
+      - name: Validate required secrets
+        shell: bash
+        run: |
+          test -n "$SUPABASE_ACCESS_TOKEN" || (echo "SUPABASE_ACCESS_TOKEN ausente" && exit 1)
+          test -n "$PROJECT_ID" || (echo "SUPABASE_PROJECT_REF ausente" && exit 1)
+
+      - name: Deploy all Edge Functions
+        run: supabase functions deploy --project-ref "$PROJECT_ID"

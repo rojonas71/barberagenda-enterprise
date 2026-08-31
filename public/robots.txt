@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /painel/
+Disallow: /dev-admin/
+Disallow: /login
+Disallow: /onboarding
