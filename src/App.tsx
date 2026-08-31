@@ -30,6 +30,7 @@ import { SupportCenterPage } from './pages/SupportCenterPage'
 import { WaitlistPage } from './pages/WaitlistPage'
 import { InventoryPage } from './pages/InventoryPage'
 import { SystemCheckPage } from './pages/SystemCheckPage'
+import { OfflineStatus } from './components/OfflineStatus'
 import './styles.css'
 
 export default function App() {
@@ -71,6 +72,7 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       </MaintenanceGate>
+      <OfflineStatus />
     </BrowserRouter>
   )
 }

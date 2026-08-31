@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { getPendingOfflineCount } from '../lib/offline'
 import type { Business, Professional, Service } from '../types'
 
 type BusyRange = { start_time: string; end_time: string }
@@ -33,7 +34,7 @@ type DayRules = {
 }
 type MessageKind = 'error' | 'success' | 'info'
 type BookingResult = {
-  status: 'confirmed' | 'pending'
+  status: 'confirmed' | 'pending' | 'queued'
   serviceName: string
   professionalName: string
   appointmentDate: string
@@ -115,12 +116,24 @@ export function BookingPage() {
   const [waitlistNotes, setWaitlistNotes] = useState('')
   const [waitlistSubmitting, setWaitlistSubmitting] = useState(false)
   const [bookingResult, setBookingResult] = useState<BookingResult | null>(null)
+  const [isOnline, setIsOnline] = useState(() => typeof navigator === 'undefined' ? true : navigator.onLine)
 
   const showMessage = (text: string, kind: MessageKind = 'error') => {
     setMessage(text)
     setMessageKind(kind)
   }
   const clearMessage = () => setMessage('')
+
+  useEffect(() => {
+    const online = () => setIsOnline(true)
+    const offline = () => { setIsOnline(false); setRealtimeConnected(false) }
+    window.addEventListener('online', online)
+    window.addEventListener('offline', offline)
+    return () => {
+      window.removeEventListener('online', online)
+      window.removeEventListener('offline', offline)
+    }
+  }, [])
 
   useEffect(() => {
     ;(async () => {
@@ -268,7 +281,7 @@ export function BookingPage() {
           `Horário: ${bookingResult.appointmentTime}`,
           `Duração: ${bookingResult.duration} min`,
           `Valor: ${money(bookingResult.price)}`,
-          `Status: ${bookingResult.status === 'confirmed' ? 'Confirmado' : 'Aguardando confirmação'}.`,
+          `Status: ${bookingResult.status === 'queued' ? 'Salvo offline, aguardando sincronização' : bookingResult.status === 'confirmed' ? 'Confirmado' : 'Aguardando confirmação'}.`,
         ].join('\n'),
       )
     : ''
@@ -286,7 +299,8 @@ export function BookingPage() {
     setSubmitting(true)
     clearMessage()
     const endTime = fromMinutes(toMinutes(time) + selectedService.duration_minutes)
-    const status = business.auto_confirm_bookings === false ? 'pending' : 'confirmed'
+    const status: 'pending' | 'confirmed' = business.auto_confirm_bookings === false ? 'pending' : 'confirmed'
+    const pendingBefore = await getPendingOfflineCount()
     const { error } = await supabase.from('appointments').insert({
       business_id: business.id,
       professional_id: professionalId,
@@ -302,6 +316,8 @@ export function BookingPage() {
       payment_status: 'unpaid',
     })
     setSubmitting(false)
+    const pendingAfter = await getPendingOfflineCount()
+    const queuedOffline = pendingAfter > pendingBefore
     if (error) {
       await loadAvailability()
       const msg = error.message.includes('appointments_no_overlap')
@@ -315,7 +331,7 @@ export function BookingPage() {
       return
     }
     setBookingResult({
-      status,
+      status: queuedOffline ? 'queued' : status,
       serviceName: selectedService.name,
       professionalName: selectedProfessional.name,
       appointmentDate: date,
@@ -323,8 +339,10 @@ export function BookingPage() {
       duration: selectedService.duration_minutes,
       price: Number(selectedService.price),
     })
-    showMessage(status === 'confirmed' ? 'Agendamento confirmado com sucesso!' : 'Solicitação enviada com sucesso!', 'success')
-    await loadAvailability()
+    showMessage(queuedOffline
+      ? 'Agendamento salvo neste aparelho. Quando a internet voltar, o sistema irá sincronizar e validar o horário.'
+      : status === 'confirmed' ? 'Agendamento confirmado com sucesso!' : 'Solicitação enviada com sucesso!', 'success')
+    if (!queuedOffline) await loadAvailability()
   }
 
   async function joinWaitlist(e: FormEvent) {
@@ -333,6 +351,7 @@ export function BookingPage() {
       return showMessage('Informe seu nome, telefone e o serviço desejado.')
     }
     setWaitlistSubmitting(true)
+    const pendingBefore = await getPendingOfflineCount()
     const { error } = await supabase.from('waitlist_entries').insert({
       business_id: business.id,
       service_id: selectedService.id,
@@ -346,8 +365,11 @@ export function BookingPage() {
       source: 'public',
     })
     setWaitlistSubmitting(false)
+    const pendingAfter = await getPendingOfflineCount()
     if (error) return showMessage(`Não foi possível entrar na lista de espera: ${error.message}`)
-    showMessage('Você entrou na lista de espera. A empresa poderá entrar em contato caso surja uma vaga.', 'success')
+    showMessage(pendingAfter > pendingBefore
+      ? 'Lista de espera salva offline. Ela será sincronizada quando a conexão voltar.'
+      : 'Você entrou na lista de espera. A empresa poderá entrar em contato caso surja uma vaga.', 'success')
     setWaitlistOpen(false)
     setWaitlistNotes('')
   }
@@ -384,8 +406,10 @@ export function BookingPage() {
       <div className="booking-success-shell">
         <div className="booking-success-icon"><BadgeCheck size={42}/></div>
         <span className="eyebrow">AGENDAMENTO RECEBIDO</span>
-        <h1>{bookingResult.status === 'confirmed' ? 'Seu horário está confirmado.' : 'Sua solicitação foi enviada.'}</h1>
-        <p>{bookingResult.status === 'confirmed' ? 'Pronto! Guarde os dados abaixo para o dia do atendimento.' : 'A empresa irá analisar a solicitação antes de confirmar o horário.'}</p>
+        <h1>{bookingResult.status === 'queued' ? 'Agendamento salvo offline.' : bookingResult.status === 'confirmed' ? 'Seu horário está confirmado.' : 'Sua solicitação foi enviada.'}</h1>
+        <p>{bookingResult.status === 'queued'
+          ? 'Sem internet no momento. O BarberAgenda guardou a solicitação neste aparelho e tentará sincronizar automaticamente quando a conexão voltar. O horário só será confirmado após a sincronização.'
+          : bookingResult.status === 'confirmed' ? 'Pronto! Guarde os dados abaixo para o dia do atendimento.' : 'A empresa irá analisar a solicitação antes de confirmar o horário.'}</p>
         <div className="booking-success-card">
           <div><span>Serviço</span><strong>{bookingResult.serviceName}</strong></div>
           <div><span>Profissional</span><strong>{bookingResult.professionalName}</strong></div>
@@ -416,7 +440,7 @@ export function BookingPage() {
         </div>
         <div className="booking-header-meta">
           {businessWhatsAppUrl && <a className="booking-header-whatsapp" href={businessWhatsAppUrl} target="_blank" rel="noreferrer"><MessageCircle size={14}/><span>WhatsApp</span></a>}
-          <span className={`live-badge ${realtimeConnected ? 'online' : 'connecting'}`}><Radio size={14}/>{realtimeConnected ? 'Agenda ao vivo' : 'Conectando...'}</span>
+          <span className={`live-badge ${!isOnline ? 'offline' : realtimeConnected ? 'online' : 'connecting'}`}><Radio size={14}/>{!isOnline ? 'Modo offline' : realtimeConnected ? 'Agenda ao vivo' : 'Conectando...'}</span>
           {business.address && <span className="booking-location"><MapPin size={14}/>{business.address}</span>}
         </div>
       </div>
