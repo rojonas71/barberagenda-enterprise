@@ -11,7 +11,6 @@ O Admin Dev é um painel global separado do painel de cada barbearia/salão.
 - `/dev-admin/planos` — catálogo de planos
 - `/dev-admin/suporte` — tickets globais
 - `/dev-admin/saude` — erros, incidentes e observabilidade
-- `/dev-admin/auditoria` — trilhas de auditoria
 - `/dev-admin/configuracoes` — manutenção, novos cadastros e equipe Dev
 
 ## 1. Banco

@@ -13,7 +13,6 @@ import { FinancePage } from './pages/FinancePage'
 import { ReportsPage } from './pages/ReportsPage'
 import { AvailabilityPage } from './pages/AvailabilityPage'
 import { TeamPage } from './pages/TeamPage'
-import { AuditPage } from './pages/AuditPage'
 import { InvitePage } from './pages/InvitePage'
 import { MaintenanceGate } from './components/MaintenanceGate'
 import { DevAdminLayout } from './components/DevAdminLayout'
@@ -24,12 +23,9 @@ import { DevUsersPage } from './pages/dev/DevUsersPage'
 import { DevPlansPage } from './pages/dev/DevPlansPage'
 import { DevSupportPage } from './pages/dev/DevSupportPage'
 import { DevHealthPage } from './pages/dev/DevHealthPage'
-import { DevAuditPage } from './pages/dev/DevAuditPage'
 import { DevSettingsPage } from './pages/dev/DevSettingsPage'
 import { SupportCenterPage } from './pages/SupportCenterPage'
 import { WaitlistPage } from './pages/WaitlistPage'
-import { InventoryPage } from './pages/InventoryPage'
-import { SystemCheckPage } from './pages/SystemCheckPage'
 import { OfflineStatus } from './components/OfflineStatus'
 import './styles.css'
 
@@ -52,11 +48,8 @@ export default function App() {
         <Route path="/painel/financeiro" element={<FinancePage />} />
         <Route path="/painel/relatorios" element={<ReportsPage />} />
         <Route path="/painel/equipe" element={<TeamPage />} />
-        <Route path="/painel/auditoria" element={<AuditPage />} />
         <Route path="/painel/suporte" element={<SupportCenterPage />} />
         <Route path="/painel/lista-espera" element={<WaitlistPage />} />
-        <Route path="/painel/estoque" element={<InventoryPage />} />
-        <Route path="/painel/diagnostico" element={<SystemCheckPage />} />
         <Route path="/convite/:token" element={<InvitePage />} />
         <Route path="/dev-admin/login" element={<DevLoginPage />} />
         <Route path="/dev-admin" element={<DevAdminLayout />}>
@@ -66,7 +59,6 @@ export default function App() {
           <Route path="planos" element={<DevPlansPage />} />
           <Route path="suporte" element={<DevSupportPage />} />
           <Route path="saude" element={<DevHealthPage />} />
-          <Route path="auditoria" element={<DevAuditPage />} />
           <Route path="configuracoes" element={<DevSettingsPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

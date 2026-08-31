@@ -139,7 +139,7 @@ function isReadRpc(url: URL) {
   const marker = '/rest/v1/rpc/'
   if (!url.pathname.includes(marker)) return false
   const name = url.pathname.split(marker)[1] || ''
-  return /^(get_|dev_list_|dev_admin_dashboard$|dev_health_summary$|dev_current_role$|dev_can$|app_schema_health$)/.test(name)
+  return /^(get_|dev_list_|dev_admin_dashboard$|dev_health_summary$|dev_current_role$|dev_can$)/.test(name)
 }
 
 function isCacheableRead(request: Request, url: URL) {

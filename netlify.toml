@@ -8,13 +8,13 @@
   VITE_SUPABASE_URL = "https://etqkvxjugxrhgnjrfzro.supabase.co"
   VITE_SUPABASE_ANON_KEY = "sb_publishable_qQlc6g9njc8aYJqkHSM4mg_zJysq8BI"
 
-# React Router / Vite SPA
+# React Router / Vite SPA fallback.
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
-# Segurança
+# Security headers for every route.
 [[headers]]
   for = "/*"
   [headers.values]
@@ -25,17 +25,19 @@
     X-Permitted-Cross-Domain-Policies = "none"
     Content-Security-Policy = "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; form-action 'self'; upgrade-insecure-requests"
 
-# Assets do Vite
+# Vite content-hashed assets can be cached aggressively.
 [[headers]]
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
+# HTML should always revalidate so releases appear immediately.
 [[headers]]
   for = "/index.html"
   [headers.values]
     Cache-Control = "no-cache, no-store, must-revalidate"
 
+# Service worker must revalidate so new releases take control quickly.
 [[headers]]
   for = "/sw.js"
   [headers.values]

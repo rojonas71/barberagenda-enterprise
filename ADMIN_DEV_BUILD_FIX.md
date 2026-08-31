@@ -11,7 +11,6 @@ Esta versão mantém o Admin Dev completo e remove definitivamente resíduos do 
 - `/dev-admin/planos`
 - `/dev-admin/suporte`
 - `/dev-admin/saude`
-- `/dev-admin/auditoria`
 - `/dev-admin/configuracoes`
 
 ## SQL Admin Dev

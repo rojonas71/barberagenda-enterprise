@@ -13,7 +13,6 @@ import {
   ListOrdered,
   LockKeyhole,
   MonitorSmartphone,
-  PackageSearch,
   Scissors,
   Settings2,
   ShieldCheck,
@@ -33,8 +32,6 @@ const features = [
   { icon: BarChart3, title: 'Dashboard e relatórios', text: 'Indicadores de operação, faturamento, ticket médio, serviços mais realizados e performance da equipe.' },
   { icon: UserCheck, title: 'Equipe e permissões', text: 'Owner, gerente, recepção e profissional com acessos separados e controle por função.' },
   { icon: ListOrdered, title: 'Lista de espera', text: 'Capture clientes quando a agenda estiver cheia e acompanhe contato, conversão ou cancelamento.' },
-  { icon: PackageSearch, title: 'Estoque operacional', text: 'Produtos e consumíveis com saldo, custo, estoque mínimo, movimentações e alertas.' },
-  { icon: ShieldCheck, title: 'Auditoria', text: 'Rastreie alterações importantes para saber o que mudou, quando mudou e por quem.' },
   { icon: Settings2, title: 'Configuração do negócio', text: 'Horários, regras de antecedência, cancelamento, agenda pública, endereço e identidade da empresa.' },
   { icon: Smartphone, title: 'Mobile + PC', text: 'Experiência responsiva para celular, tablet, notebook e desktop, com PWA instalável.' },
   { icon: Zap, title: 'Tempo real', text: 'Agenda, clientes e operação sincronizados pelo Supabase Realtime sem depender de recarregar a página.' },
@@ -76,7 +73,7 @@ export function HomePage() {
         <div className="landing-hero-copy">
           <span className="eyebrow"><Sparkles size={14}/> GESTÃO COMPLETA PARA BARBEARIAS E SALÕES</span>
           <h1>Organize sua agenda. Conheça seus clientes. Controle sua operação.</h1>
-          <p className="landing-lead">Centralize agendamentos, equipe, clientes, financeiro, disponibilidade, estoque e relatórios em uma plataforma profissional preparada para acompanhar o dia a dia do seu negócio.</p>
+          <p className="landing-lead">Centralize agendamentos, equipe, clientes, financeiro, disponibilidade e relatórios em uma plataforma profissional preparada para acompanhar o dia a dia do seu negócio.</p>
 
           <div className="hero-actions landing-hero-actions">
             <Link className="button button-primary landing-main-cta" to="/login?mode=register">
@@ -183,7 +180,7 @@ export function HomePage() {
           <article><span>01</span><div><CalendarDays/><h3>Configure sua operação</h3><p>Cadastre empresa, serviços, profissionais, jornadas, regras e disponibilidade.</p></div></article>
           <article><span>02</span><div><Smartphone/><h3>Compartilhe sua agenda</h3><p>O cliente acessa a página pública pelo celular e consulta os horários disponíveis.</p></div></article>
           <article><span>03</span><div><CalendarCheck2/><h3>Receba o agendamento</h3><p>O novo horário entra na agenda e fica disponível para a equipe acompanhar em tempo real.</p></div></article>
-          <article><span>04</span><div><BarChart3/><h3>Acompanhe a operação</h3><p>Histórico, clientes, financeiro, estoque e indicadores evoluem junto com os atendimentos.</p></div></article>
+          <article><span>04</span><div><BarChart3/><h3>Acompanhe a operação</h3><p>Histórico, clientes, financeiro e indicadores evoluem junto com os atendimentos.</p></div></article>
         </div>
       </section>
 
@@ -217,7 +214,6 @@ export function HomePage() {
               <span><Database size={17}/> PostgreSQL</span>
               <span><Activity size={17}/> Realtime</span>
               <span><UserCheck size={17}/> RBAC por função</span>
-              <span><FileClock size={17}/> Auditoria</span>
             </div>
           </div>
           <div className="landing-security-stack">
@@ -225,7 +221,7 @@ export function HomePage() {
             <ArrowRight size={18}/>
             <div><small>PLATAFORMA</small><strong>Supabase</strong><span>Auth • RLS • Realtime • RPC</span></div>
             <ArrowRight size={18}/>
-            <div><small>DADOS</small><strong>PostgreSQL</strong><span>Multiempresa • Auditoria • Regras</span></div>
+            <div><small>DADOS</small><strong>PostgreSQL</strong><span>Multiempresa • Regras de negócio</span></div>
           </div>
         </div>
       </section>

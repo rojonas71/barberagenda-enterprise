@@ -168,17 +168,6 @@ export type BusinessInvite = {
   created_at: string
 }
 
-export type AuditLog = {
-  id: string
-  business_id: string
-  actor_user_id: string | null
-  table_name: string
-  record_id: string | null
-  action: 'INSERT' | 'UPDATE' | 'DELETE'
-  old_data: Record<string, unknown> | null
-  new_data: Record<string, unknown> | null
-  created_at: string
-}
 
 
 export type WaitlistEntry = {
@@ -197,24 +186,4 @@ export type WaitlistEntry = {
   updated_at: string
 }
 
-export type InventoryProduct = {
-  id: string
-  business_id: string
-  name: string
-  sku: string | null
-  unit: string
-  stock_quantity: number
-  min_stock: number
-  cost_price: number
-  sale_price: number
-  active: boolean
-  created_at: string
-  updated_at: string
-}
 
-export type SchemaHealthItem = {
-  category: string
-  check_name: string
-  status: 'OK' | 'MISSING' | 'WARN'
-  detail: string
-}

@@ -37,7 +37,7 @@ export function DevAdminLayout() {
   const links = [
     ['/dev-admin', 'Visão global', BarChart3], ['/dev-admin/empresas', 'Empresas', Building2], ['/dev-admin/usuarios', 'Usuários', Users],
     ['/dev-admin/planos', 'Planos', CreditCard], ['/dev-admin/suporte', 'Suporte', Headphones], ['/dev-admin/saude', 'Saúde', Activity],
-    ['/dev-admin/auditoria', 'Auditoria', ShieldCheck], ['/dev-admin/configuracoes', 'Configurações', Settings],
+    ['/dev-admin/configuracoes', 'Configurações', Settings],
   ] as const
 
   return <main className="dev-shell">

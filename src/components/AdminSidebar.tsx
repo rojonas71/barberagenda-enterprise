@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
-import { BarChart3, CalendarDays, CircleDollarSign, ClipboardList, Database, FileClock, Headphones, LayoutDashboard, ListOrdered, LogOut, Menu, PackageSearch, Scissors, Settings, ShieldCheck, UserRound, Users, X } from 'lucide-react'
+import { BarChart3, CalendarDays, CircleDollarSign, FileClock, Headphones, LayoutDashboard, ListOrdered, LogOut, Menu, Scissors, Settings, ShieldCheck, UserRound, Users, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
-type Section='dashboard'|'agenda'|'clients'|'services'|'professionals'|'availability'|'waitlist'|'inventory'|'finance'|'reports'|'team'|'audit'|'support'|'diagnostics'|'settings'
+type Section='dashboard'|'agenda'|'clients'|'services'|'professionals'|'availability'|'waitlist'|'finance'|'reports'|'team'|'support'|'settings'
 type Role='owner'|'manager'|'receptionist'|'professional'
 
 export function AdminSidebar({businessName,current}:{businessName:string;current:Section}){
@@ -20,13 +20,10 @@ export function AdminSidebar({businessName,current}:{businessName:string;current
   {key:'professionals' as const,label:'Profissionais',path:'/painel/profissionais',icon:UserRound,roles:['owner','manager']},
   {key:'availability' as const,label:'Disponibilidade',path:'/painel/disponibilidade',icon:FileClock,roles:['owner','manager','receptionist','professional']},
   {key:'waitlist' as const,label:'Lista de espera',path:'/painel/lista-espera',icon:ListOrdered,roles:['owner','manager','receptionist','professional']},
-  {key:'inventory' as const,label:'Estoque',path:'/painel/estoque',icon:PackageSearch,roles:['owner','manager','receptionist']},
   {key:'finance' as const,label:'Financeiro',path:'/painel/financeiro',icon:CircleDollarSign,roles:['owner','manager']},
   {key:'reports' as const,label:'Relatórios',path:'/painel/relatorios',icon:BarChart3,roles:['owner','manager','professional']},
   {key:'team' as const,label:'Equipe',path:'/painel/equipe',icon:ShieldCheck,roles:['owner','manager']},
-  {key:'audit' as const,label:'Auditoria',path:'/painel/auditoria',icon:ClipboardList,roles:['owner','manager']},
   {key:'support' as const,label:'Suporte',path:'/painel/suporte',icon:Headphones,roles:['owner','manager','receptionist','professional']},
-  {key:'diagnostics' as const,label:'Diagnóstico',path:'/painel/diagnostico',icon:Database,roles:['owner','manager']},
   {key:'settings' as const,label:'Configurações',path:'/painel/configuracoes',icon:Settings,roles:['owner']},
  ]
  const visibleItems=items.filter(i=>i.roles.includes(role))

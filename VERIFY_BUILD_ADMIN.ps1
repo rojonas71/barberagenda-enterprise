@@ -18,6 +18,15 @@ if ($forbidden) {
 }
 Write-Host "[OK] Nenhum residuo antigo de WhatsApp no frontend." -ForegroundColor Green
 
+$removedModules = Get-ChildItem (Join-Path $PSScriptRoot "src") -Recurse -File |
+    Select-String -Pattern '/painel/estoque|/painel/auditoria|/painel/diagnostico|/dev-admin/auditoria|InventoryPage|AuditPage|SystemCheckPage|DevAuditPage'
+if ($removedModules) {
+    Write-Host "[ERRO] Existem referencias aos modulos removidos:" -ForegroundColor Red
+    $removedModules | ForEach-Object { Write-Host $_.Path ':' $_.LineNumber $_.Line }
+    exit 1
+}
+Write-Host "[OK] Estoque, Auditoria e Diagnostico removidos do frontend." -ForegroundColor Green
+
 $app = Get-Content (Join-Path $PSScriptRoot "src\App.tsx") -Raw
 $routes = @(
   '/dev-admin/login',
@@ -27,7 +36,6 @@ $routes = @(
   'planos',
   'suporte',
   'saude',
-  'auditoria',
   'configuracoes'
 )
 
@@ -40,7 +48,7 @@ foreach ($route in $routes) {
 Write-Host "[OK] Rotas principais do Admin Dev presentes." -ForegroundColor Green
 
 $devPages = Get-ChildItem (Join-Path $PSScriptRoot "src\pages\dev") -Filter *.tsx -File
-if ($devPages.Count -lt 9) {
+if ($devPages.Count -lt 8) {
     Write-Host "[ERRO] Paginas Admin Dev incompletas. Encontradas: $($devPages.Count)" -ForegroundColor Red
     exit 1
 }
@@ -51,7 +59,6 @@ $requiredSql = @(
   'dev-admin-upgrade.sql',
   'fix-dev-admin-rpcs.sql',
   'fix-system-settings.sql',
-  'fix-audit-logs.sql',
   'setup-dev-admin.sql'
 )
 foreach ($file in $requiredSql) {

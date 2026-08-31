@@ -1,6 +1,10 @@
 # BarberAgenda Enterprise 4.0
 
-Sistema profissional de gestão para barbearias e salões, com agenda em tempo real, CRM, financeiro, equipe, permissões, lista de espera, estoque, diagnóstico técnico e Admin Dev.
+## Versão 4.1.1
+
+A versão atual foi simplificada e não possui módulos de **Estoque, Auditoria ou Diagnóstico** na interface.
+
+Sistema profissional de gestão para barbearias e salões, com agenda em tempo real, CRM, financeiro, equipe, permissões, lista de espera, Admin Dev e modo Offline First.
 
 ## Stack
 
@@ -23,7 +27,6 @@ Além dos módulos Advanced, esta versão inclui:
 - agendamento automático ou pendente;
 - pausa da agenda pública;
 - mensagem personalizada na página de agendamento;
-- diagnóstico de tabelas, colunas e RPCs;
 - `MASTER_PRODUCTION_UPGRADE.sql` para bancos existentes;
 - PWA instalável no celular;
 - suporte completo a mobile e PC;
@@ -40,7 +43,6 @@ supabase/MASTER_PRODUCTION_UPGRADE.sql
 Depois acesse:
 
 ```text
-/painel/diagnostico
 ```
 
 para validar a estrutura esperada pelo frontend.
@@ -240,30 +242,6 @@ Convites são aceitos em:
 /convite/:token
 ```
 
-### Auditoria
-
-```text
-/painel/auditoria
-```
-
-Registra operações importantes em:
-
-- agenda;
-- clientes;
-- serviços;
-- profissionais;
-- financeiro;
-- bloqueios;
-- equipe.
-
-O histórico registra:
-
-- operação (`INSERT`, `UPDATE`, `DELETE`);
-- usuário;
-- tabela;
-- registro;
-- data/hora;
-- dados anteriores e posteriores no banco.
 
 ### Configurações
 
@@ -293,7 +271,6 @@ A versão Advanced adiciona regras importantes no banco:
 - profissional vinculado acessa somente os agendamentos vinculados a ele;
 - recepção não altera serviços/profissionais;
 - financeiro restrito a proprietário/gerente;
-- auditoria restrita a proprietário/gerente;
 - owner não pode ser removido ou rebaixado acidentalmente;
 - preço enviado pelo cliente na agenda pública não é confiado pelo backend;
 - o banco recalcula o preço público a partir do serviço;
@@ -437,7 +414,6 @@ src/
     supabase.ts
   pages/
     AdminPage.tsx
-    AuditPage.tsx
     AvailabilityPage.tsx
     BookingPage.tsx
     ClientsPage.tsx
@@ -478,7 +454,6 @@ Principais recursos:
 - usuários Supabase Auth com bloqueio/desbloqueio e recuperação por e-mail;
 - central de suporte em tempo real;
 - observabilidade com logs de erro e incidentes;
-- auditoria global;
 - modo manutenção;
 - controle de novos cadastros;
 - múltiplos papéis de Admin Dev;
@@ -521,8 +496,6 @@ Os campos de contato usam **telefone**. Para bancos que receberam anteriormente 
 
 ## Admin Dev Enterprise
 
-O Dev Console inclui módulos avançados de Empresas, Usuários, Planos, Suporte, Saúde, Auditoria e Configurações com KPIs, filtros, detalhes, exportação CSV e RBAC.
+O Dev Console inclui módulos avançados de Empresas, Usuários, Planos, Suporte, Saúde e Configurações com KPIs, filtros, detalhes, exportação CSV e RBAC.
 
 Documentação: `ADMIN_DEV_ENTERPRISE.md`
-
-Diagnóstico do Supabase: `supabase/DEV_ADMIN_ENTERPRISE_CHECK.sql`

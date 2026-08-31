@@ -46,9 +46,7 @@
 ## Enterprise 4.0
 
 - [ ] Em banco existente, executar `supabase/MASTER_PRODUCTION_UPGRADE.sql`.
-- [ ] Abrir `/painel/diagnostico` e confirmar todos os itens como `OK`.
 - [ ] Testar lista de espera pública quando uma data estiver sem horários.
-- [ ] Testar CRUD e ajuste de estoque em `/painel/estoque`.
 - [ ] Testar `booking_enabled`, `auto_confirm_bookings` e `allow_waitlist` em Configurações.
 - [ ] Confirmar que `/manifest.webmanifest`, `/icon.svg` e `/sw.js` respondem em produção.
 - [ ] Confirmar que o projeto não contém integração WhatsApp.
