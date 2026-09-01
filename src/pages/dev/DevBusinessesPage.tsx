@@ -55,65 +55,64 @@ export function DevBusinessesPage(){
     const dueSoon=!overdue&&daysUntilDue!==null&&daysUntilDue>=0&&daysUntilDue<=5
 
     const lines=overdue?[
-      `🔴 *Mensalidade pendente — BarberAgenda*`,
+      `\u{1F534} *Mensalidade pendente — BarberAgenda*`,
       ``,
-      `Olá! 👋 Tudo bem?`,
+      `Olá! \u{1F44B} Tudo bem?`,
       ``,
       `Identificamos que sua mensalidade do BarberAgenda está pendente.`,
       ``,
-      `📦 *Plano:* ${b.plan_name||'Plano Profissional'}`,
-      `💰 *Valor:* ${price}/mês`,
-      ...(due?[`📅 *Vencimento:* ${due}`]:[]),
+      `\u{1F4E6} *Plano:* ${b.plan_name||'Plano Profissional'}`,
+      `\u{1F4B0} *Valor:* ${price}/mês`,
+      ...(due?[`\u{1F4C5} *Vencimento:* ${due}`]:[]),
       ``,
-      `⚠️ Regularize o pagamento para manter seu acesso ao BarberAgenda normalmente.`,
+      `\u{26A0}\u{FE0F} Regularize o pagamento para manter seu acesso ao BarberAgenda normalmente.`,
       ``,
-      `💳 *Pagamento:*`,
-      `🔗 ${payment}`,
+      `\u{1F4B3} *Pagamento:*`,
+      `\u{1F517} ${payment}`,
       ``,
-      `📸 Depois do pagamento, envie o comprovante por aqui.`,
+      `\u{1F4F8} Depois do pagamento, envie o comprovante por aqui.`,
       ``,
-      `✅ Assim que confirmarmos, sua mensalidade ficará regularizada.`,
+      `\u{2705} Assim que confirmarmos, sua mensalidade ficará regularizada.`,
       ``,
-      `✂️ Obrigado por utilizar o BarberAgenda! 💈📅🚀`
+      `\u{2702}\u{FE0F} Obrigado por utilizar o BarberAgenda! \u{1F488}\u{1F4C5}\u{1F680}`
     ]:dueSoon?[
-      `🟡 *Lembrete de mensalidade — BarberAgenda*`,
+      `\u{1F7E1} *Lembrete de mensalidade — BarberAgenda*`,
       ``,
-      `Olá! 👋 Tudo bem?`,
+      `Olá! \u{1F44B} Tudo bem?`,
       ``,
       `Sua mensalidade do BarberAgenda vence em breve.`,
       ``,
-      `📦 *Plano:* ${b.plan_name||'Plano Profissional'}`,
-      `💰 *Valor:* ${price}/mês`,
-      ...(due?[`📅 *Vencimento:* ${due}`]:[]),
+      `\u{1F4E6} *Plano:* ${b.plan_name||'Plano Profissional'}`,
+      `\u{1F4B0} *Valor:* ${price}/mês`,
+      ...(due?[`\u{1F4C5} *Vencimento:* ${due}`]:[]),
       ``,
-      `💳 Você já pode realizar o pagamento pelo link abaixo:`,
-      `🔗 ${payment}`,
+      `\u{1F4B3} Você já pode realizar o pagamento pelo link abaixo:`,
+      `\u{1F517} ${payment}`,
       ``,
-      `📲 Após o pagamento, envie o comprovante por aqui.`,
+      `\u{1F4F2} Após o pagamento, envie o comprovante por aqui.`,
       ``,
-      `💈 Obrigado por fazer parte do BarberAgenda! ✂️🚀`
+      `\u{1F488} Obrigado por fazer parte do BarberAgenda! \u{2702}\u{FE0F}\u{1F680}`
     ]:[
-      `👋 Olá! Tudo bem?`,
+      `\u{1F44B} Olá! Tudo bem?`,
       ``,
-      `💈 Este é um lembrete da sua mensalidade do *BarberAgenda*.`,
+      `\u{1F488} Este é um lembrete da sua mensalidade do *BarberAgenda*.`,
       ``,
-      `📦 *Plano:* ${b.plan_name||'Plano Profissional'}`,
-      `💰 *Valor:* ${price}/mês`,
-      ...(due?[`📅 *Vencimento:* ${due}`]:[]),
+      `\u{1F4E6} *Plano:* ${b.plan_name||'Plano Profissional'}`,
+      `\u{1F4B0} *Valor:* ${price}/mês`,
+      ...(due?[`\u{1F4C5} *Vencimento:* ${due}`]:[]),
       ``,
-      `🚨 Para manter seu acesso ao sistema ativo e continuar utilizando todos os recursos, realize o pagamento pelo link abaixo:`,
+      `\u{1F6A8} Para manter seu acesso ao sistema ativo e continuar utilizando todos os recursos, realize o pagamento pelo link abaixo:`,
       ``,
-      `🔗 ${payment}`,
+      `\u{1F517} ${payment}`,
       ``,
-      `📲 Após o pagamento, envie o comprovante por aqui.`,
+      `\u{1F4F2} Após o pagamento, envie o comprovante por aqui.`,
       ``,
-      `✅ Assim que confirmarmos, sua mensalidade fica regularizada.`,
+      `\u{2705} Assim que confirmarmos, sua mensalidade fica regularizada.`,
       ``,
-      `✂️ Obrigado por utilizar o BarberAgenda! 🚀`
+      `\u{2702}\u{FE0F} Obrigado por utilizar o BarberAgenda! \u{1F680}`
     ]
 
-    return `https://wa.me/${number}?text=${encodeURIComponent(lines.join('
-'))}`
+    return `https://wa.me/${number}?text=${encodeURIComponent(lines.join('\\n'))}`
   }
 
   function sendBillingWhatsApp(b:Row){
