@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Building2, Copy, Download, ExternalLink, RefreshCcw, Search, ShieldBan, UsersRound, WalletCards, X } from 'lucide-react'
+import { Building2, Copy, Download, ExternalLink, MessageCircle, RefreshCcw, Search, ShieldBan, UsersRound, WalletCards, X } from 'lucide-react'
 import { useOutletContext } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import type { DevOutletContext } from '../../components/DevAdminLayout'
@@ -9,7 +9,8 @@ type PlatformStatus = 'active' | 'suspended' | 'archived'
 type Row = {
   id:string; name:string; slug:string; platform_status:PlatformStatus; created_at:string; owner_email:string|null;
   member_count:number; client_count:number; appointment_count:number; completed_revenue:number; plan_id:string|null;
-  plan_name:string|null; subscription_status:string|null; current_period_ends_at:string|null; last_appointment_at:string|null
+  plan_name:string|null; subscription_status:string|null; current_period_ends_at:string|null; last_appointment_at:string|null;
+  phone:string|null; plan_price_monthly:number|null; payment_url:string|null
 }
 type Plan={id:string;name:string;code:string;active:boolean}
 
@@ -28,6 +29,48 @@ export function DevBusinessesPage(){
   const [loading,setLoading]=useState(false)
   const canStatus=['super_admin','ops'].includes(role)
   const canBilling=['super_admin','billing'].includes(role)
+
+  function whatsappNumber(value:string|null){
+    const digits=(value||'').replace(/\D/g,'')
+    if(!digits)return ''
+    if(digits.startsWith('55')&&digits.length>=12)return digits
+    if(digits.length===10||digits.length===11)return `55${digits}`
+    return digits
+  }
+
+  function billingWhatsAppUrl(b:Row){
+    const number=whatsappNumber(b.phone)
+    if(!number)return ''
+    const price=money(Number(b.plan_price_monthly||80))
+    const due=b.current_period_ends_at?dateOnly(b.current_period_ends_at):null
+    const payment=b.payment_url||'https://mpago.la/2tn4qBx'
+    const lines=[
+      `Olá! 👋 Tudo bem?`,
+      ``,
+      `Este é um lembrete da mensalidade do BarberAgenda. ✂️📅`,
+      ``,
+      `💳 Plano: ${b.plan_name||'Plano Profissional'}`,
+      `💰 Valor: ${price}/mês`,
+      ...(due?[`📅 Vencimento: ${due}`]:[]),
+      ``,
+      `Para manter seu acesso ao sistema em dia, realize o pagamento pelo link:`,
+      payment,
+      ``,
+      `Após o pagamento, envie o comprovante por aqui. ✅`,
+      ``,
+      `Obrigado por utilizar o BarberAgenda!`
+    ]
+    return `https://wa.me/${number}?text=${encodeURIComponent(lines.join('\n'))}`
+  }
+
+  function sendBillingWhatsApp(b:Row){
+    const url=billingWhatsAppUrl(b)
+    if(!url){
+      setMsg(`A empresa ${b.name} não possui telefone/WhatsApp cadastrado.`)
+      return
+    }
+    window.open(url,'_blank','noopener,noreferrer')
+  }
 
   async function load(){
     setLoading(true); setMsg('')
@@ -88,8 +131,8 @@ export function DevBusinessesPage(){
       <button className="button button-primary" onClick={()=>void load()}>Buscar</button>
     </div>
 
-    <section className="dev-panel"><div className="dev-panel-head"><div><h2>Base de empresas</h2><p>{filtered.length} resultado(s) no filtro atual.</p></div></div><div className="dev-table-wrap"><table className="dev-table wide"><thead><tr><th>Empresa</th><th>Proprietário</th><th>Status</th><th>Plano</th><th>Clientes</th><th>Equipe</th><th>Agenda</th><th>Receita</th><th>Última atividade</th><th>Ações</th></tr></thead><tbody>{filtered.map(b=><tr key={b.id} onDoubleClick={()=>setSelected(b)}><td><b>{b.name}</b><small>/{b.slug}</small></td><td>{b.owner_email||'—'}</td><td><span className={`dev-status ${b.platform_status}`}>{b.platform_status}</span></td><td>{canBilling?<select value={b.plan_id||''} onChange={e=>void setPlan(b,e.target.value)}><option value="">Sem plano</option>{plans.filter(p=>p.active).map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select>:b.plan_name||'Sem plano'}<small>{b.subscription_status||'sem assinatura'}</small></td><td>{b.client_count}</td><td>{b.member_count}</td><td>{b.appointment_count}</td><td>{money(b.completed_revenue)}</td><td>{dateOnly(b.last_appointment_at)}</td><td><div className="dev-actions"><button onClick={()=>setSelected(b)}>Detalhes</button><button title="Abrir agenda pública" onClick={()=>window.open(`/b/${b.slug}`,'_blank')}><ExternalLink size={15}/></button>{canStatus&&b.platform_status!=='suspended'&&<button className="danger" onClick={()=>void changeStatus(b,'suspended')}><ShieldBan size={15}/>Suspender</button>}{canStatus&&b.platform_status!=='active'&&<button onClick={()=>void changeStatus(b,'active')}>Ativar</button>}</div></td></tr>)}{!filtered.length&&<tr><td colSpan={10}>Nenhuma empresa encontrada com os filtros atuais.</td></tr>}</tbody></table></div></section>
+    <section className="dev-panel"><div className="dev-panel-head"><div><h2>Base de empresas</h2><p>{filtered.length} resultado(s) no filtro atual.</p></div></div><div className="dev-table-wrap"><table className="dev-table wide"><thead><tr><th>Empresa</th><th>Proprietário</th><th>Status</th><th>Plano</th><th>Clientes</th><th>Equipe</th><th>Agenda</th><th>Receita</th><th>Última atividade</th><th>Ações</th></tr></thead><tbody>{filtered.map(b=><tr key={b.id} onDoubleClick={()=>setSelected(b)}><td><b>{b.name}</b><small>/{b.slug}</small></td><td>{b.owner_email||'—'}</td><td><span className={`dev-status ${b.platform_status}`}>{b.platform_status}</span></td><td>{canBilling?<select value={b.plan_id||''} onChange={e=>void setPlan(b,e.target.value)}><option value="">Sem plano</option>{plans.filter(p=>p.active).map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select>:b.plan_name||'Sem plano'}<small>{b.subscription_status||'sem assinatura'}</small></td><td>{b.client_count}</td><td>{b.member_count}</td><td>{b.appointment_count}</td><td>{money(b.completed_revenue)}</td><td>{dateOnly(b.last_appointment_at)}</td><td><div className="dev-actions"><button onClick={()=>setSelected(b)}>Detalhes</button><button title="Abrir agenda pública" onClick={()=>window.open(`/b/${b.slug}`,'_blank')}><ExternalLink size={15}/></button>{canBilling&&<button title={b.phone?'Enviar aviso de mensalidade pelo WhatsApp':'WhatsApp não cadastrado'} disabled={!b.phone} onClick={()=>sendBillingWhatsApp(b)}><MessageCircle size={15}/>Cobrar</button>}{canStatus&&b.platform_status!=='suspended'&&<button className="danger" onClick={()=>void changeStatus(b,'suspended')}><ShieldBan size={15}/>Suspender</button>}{canStatus&&b.platform_status!=='active'&&<button onClick={()=>void changeStatus(b,'active')}>Ativar</button>}</div></td></tr>)}{!filtered.length&&<tr><td colSpan={10}>Nenhuma empresa encontrada com os filtros atuais.</td></tr>}</tbody></table></div></section>
 
-    {selected&&<div className="dev-detail-backdrop" onClick={()=>setSelected(null)}><aside className="dev-detail-drawer" onClick={e=>e.stopPropagation()}><div className="dev-detail-head"><div><span className="eyebrow">EMPRESA</span><h2>{selected.name}</h2><p>/{selected.slug}</p></div><button onClick={()=>setSelected(null)}><X/></button></div><div className="dev-detail-grid"><div><small>Status</small><strong><span className={`dev-status ${selected.platform_status}`}>{selected.platform_status}</span></strong></div><div><small>Plano</small><strong>{selected.plan_name||'Sem plano'}</strong></div><div><small>Clientes</small><strong>{selected.client_count}</strong></div><div><small>Equipe</small><strong>{selected.member_count}</strong></div><div><small>Agendamentos</small><strong>{selected.appointment_count}</strong></div><div><small>Receita</small><strong>{money(selected.completed_revenue)}</strong></div></div><section className="dev-detail-section"><h3>Identificação</h3><dl><div><dt>ID</dt><dd><code>{selected.id}</code></dd></div><div><dt>Proprietário</dt><dd>{selected.owner_email||'—'}</dd></div><div><dt>Criada em</dt><dd>{dateTime(selected.created_at)}</dd></div><div><dt>Último agendamento</dt><dd>{dateTime(selected.last_appointment_at)}</dd></div><div><dt>Fim do período</dt><dd>{dateTime(selected.current_period_ends_at)}</dd></div></dl></section><div className="dev-detail-actions"><button className="button" onClick={()=>void copyText(`${window.location.origin}/b/${selected.slug}`)}><Copy size={15}/>Copiar link</button><button className="button" onClick={()=>window.open(`/b/${selected.slug}`,'_blank')}><ExternalLink size={15}/>Abrir agenda</button>{canStatus&&selected.platform_status==='active'&&<button className="button danger-button" onClick={()=>void changeStatus(selected,'suspended')}><ShieldBan size={15}/>Suspender</button>}{canStatus&&selected.platform_status!=='active'&&<button className="button button-primary" onClick={()=>void changeStatus(selected,'active')}>Reativar empresa</button>}</div></aside></div>}
+    {selected&&<div className="dev-detail-backdrop" onClick={()=>setSelected(null)}><aside className="dev-detail-drawer" onClick={e=>e.stopPropagation()}><div className="dev-detail-head"><div><span className="eyebrow">EMPRESA</span><h2>{selected.name}</h2><p>/{selected.slug}</p></div><button onClick={()=>setSelected(null)}><X/></button></div><div className="dev-detail-grid"><div><small>Status</small><strong><span className={`dev-status ${selected.platform_status}`}>{selected.platform_status}</span></strong></div><div><small>Plano</small><strong>{selected.plan_name||'Sem plano'}</strong></div><div><small>Clientes</small><strong>{selected.client_count}</strong></div><div><small>Equipe</small><strong>{selected.member_count}</strong></div><div><small>Agendamentos</small><strong>{selected.appointment_count}</strong></div><div><small>Receita</small><strong>{money(selected.completed_revenue)}</strong></div></div><section className="dev-detail-section"><h3>Identificação</h3><dl><div><dt>ID</dt><dd><code>{selected.id}</code></dd></div><div><dt>Proprietário</dt><dd>{selected.owner_email||'—'}</dd></div><div><dt>Criada em</dt><dd>{dateTime(selected.created_at)}</dd></div><div><dt>Último agendamento</dt><dd>{dateTime(selected.last_appointment_at)}</dd></div><div><dt>Fim do período</dt><dd>{dateTime(selected.current_period_ends_at)}</dd></div></dl></section><div className="dev-detail-actions"><button className="button" onClick={()=>void copyText(`${window.location.origin}/b/${selected.slug}`)}><Copy size={15}/>Copiar link</button><button className="button" onClick={()=>window.open(`/b/${selected.slug}`,'_blank')}><ExternalLink size={15}/>Abrir agenda</button>{canBilling&&<button className="button" disabled={!selected.phone} onClick={()=>sendBillingWhatsApp(selected)}><MessageCircle size={15}/>Avisar mensalidade</button>}{canStatus&&selected.platform_status==='active'&&<button className="button danger-button" onClick={()=>void changeStatus(selected,'suspended')}><ShieldBan size={15}/>Suspender</button>}{canStatus&&selected.platform_status!=='active'&&<button className="button button-primary" onClick={()=>void changeStatus(selected,'active')}>Reativar empresa</button>}</div></aside></div>}
   </>
 }
