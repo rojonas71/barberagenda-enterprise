@@ -5,6 +5,7 @@ export type Business = {
   phone: string | null
   address: string | null
   logo_url: string | null
+  banner_url?: string | null
   opening_time: string
   closing_time: string
   slot_interval: number

@@ -446,6 +446,17 @@ export function BookingPage() {
       </div>
     </header>
 
+    {business.banner_url && <section className="booking-business-banner" aria-label={`Banner da ${business.name}`}>
+      <div className="container booking-business-banner-inner">
+        <img src={business.banner_url} alt={`Banner da ${business.name}`}/>
+        <div className="booking-business-banner-overlay"/>
+        <div className="booking-business-banner-brand">
+          {business.logo_url ? <img src={business.logo_url} alt=""/> : <span className="brand-icon"><Scissors size={20}/></span>}
+          <div><strong>{business.name}</strong><small>Agendamento online</small></div>
+        </div>
+      </div>
+    </section>}
+
     <div className="container booking-pro-container">
       <section className="booking-progress-card">
         <div className="booking-progress-head">

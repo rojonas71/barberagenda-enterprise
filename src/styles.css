@@ -173,3 +173,45 @@ html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}body{overflow-x:hidden
 
 /* V4.1.1 — simplified modules */
 .dashboard-waitlist-action{margin-bottom:18px}
+
+
+/* ==========================================================
+   Business media — logo/banner upload + public banner
+   ========================================================== */
+.business-media-upload{display:grid;gap:10px;padding:14px;border:1px solid rgba(73,101,132,.42);border-radius:16px;background:rgba(7,18,31,.5)}
+.business-media-title{display:flex;align-items:center;gap:8px;color:#d9e4ef;font-size:12px}
+.business-media-title svg{color:#62dca2}
+.business-media-preview{display:grid;place-items:center;min-height:150px;overflow:hidden;border:1px dashed rgba(112,143,176,.35);border-radius:14px;background:#071421}
+.business-media-upload.is-banner .business-media-preview{min-height:190px}
+.business-media-preview>img{display:block;max-width:100%;object-fit:cover}
+.business-media-upload.is-logo .business-media-preview>img{width:120px;height:120px;border-radius:24px;border:1px solid #29445b}
+.business-media-upload.is-banner .business-media-preview>img{width:100%;height:clamp(170px,25vw,260px);border-radius:11px}
+.business-media-empty{display:grid;justify-items:center;gap:8px;color:#758aa1;font-size:11px}
+.business-media-empty svg{color:#4a647e}
+.business-media-actions{display:flex;flex-wrap:wrap;gap:9px}
+.business-media-error{color:#ff9b9b;font-size:10px}
+
+.booking-business-banner{padding:16px 0 0;background:#07101d}
+.booking-business-banner-inner{position:relative;height:clamp(180px,28vw,340px);overflow:hidden;border:1px solid #1f3549;border-radius:20px;box-shadow:0 22px 60px rgba(0,0,0,.22)}
+.booking-business-banner-inner>img{width:100%;height:100%;object-fit:cover;display:block}
+.booking-business-banner-overlay{position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,14,25,.88) 0%,rgba(5,14,25,.36) 48%,rgba(5,14,25,.1) 100%),linear-gradient(0deg,rgba(5,14,25,.58),transparent 55%)}
+.booking-business-banner-brand{position:absolute;left:24px;bottom:22px;display:flex;align-items:center;gap:12px;padding:10px 13px;border:1px solid rgba(125,229,183,.18);border-radius:14px;background:rgba(5,18,28,.68);backdrop-filter:blur(12px)}
+.booking-business-banner-brand>img{width:46px;height:46px;object-fit:cover;border-radius:12px}
+.booking-business-banner-brand>div{display:grid;gap:3px}
+.booking-business-banner-brand strong{font-size:16px}
+.booking-business-banner-brand small{font-size:9px;color:#80dcae;text-transform:uppercase;letter-spacing:.09em;font-weight:800}
+
+@media(max-width:640px){
+  .business-media-upload{padding:12px}
+  .business-media-actions{display:grid;grid-template-columns:1fr}
+  .business-media-actions .button{width:100%}
+  .booking-business-banner{padding-top:10px}
+  .booking-business-banner-inner{width:min(100% - 20px,1160px);height:190px;border-radius:16px}
+  .booking-business-banner-overlay{background:linear-gradient(0deg,rgba(5,14,25,.86),rgba(5,14,25,.12) 72%)}
+  .booking-business-banner-brand{left:12px;right:12px;bottom:12px;padding:8px 10px}
+  .booking-business-banner-brand>img{width:38px;height:38px;border-radius:10px}
+  .booking-business-banner-brand strong{font-size:14px}
+  .booking-business-banner-brand small{font-size:8px}
+  .booking-pro-header-inner{flex-wrap:wrap;padding-top:8px;padding-bottom:8px}
+  .booking-header-meta{margin-left:auto}
+}
