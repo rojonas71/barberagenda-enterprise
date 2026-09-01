@@ -2285,3 +2285,9 @@ using (
       and bm.business_id::text = (storage.foldername(name))[1]
   )
 );
+
+
+-- BarberAgenda 4.2.1 — professional profile fields
+alter table public.professionals add column if not exists phone text;
+alter table public.professionals add column if not exists email text;
+alter table public.professionals add column if not exists specialty text;

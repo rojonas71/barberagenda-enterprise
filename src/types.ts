@@ -36,6 +36,9 @@ export type Professional = {
   name: string
   bio: string | null
   photo_url: string | null
+  phone?: string | null
+  email?: string | null
+  specialty?: string | null
   active: boolean
   commission_percent?: number
 }
