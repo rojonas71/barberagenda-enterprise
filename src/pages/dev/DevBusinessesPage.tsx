@@ -112,7 +112,7 @@ export function DevBusinessesPage(){
       `\u{2702}\u{FE0F} Obrigado por utilizar o BarberAgenda! \u{1F680}`
     ]
 
-    return `https://wa.me/${number}?text=${encodeURIComponent(lines.join('\\n'))}`
+    return `https://wa.me/${number}?text=${encodeURIComponent(lines.join('\n'))}`
   }
 
   function sendBillingWhatsApp(b:Row){
