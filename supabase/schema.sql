@@ -1556,6 +1556,7 @@ create table if not exists public.subscription_plans (
   name text not null,
   description text,
   price_monthly numeric(10,2) not null default 0 check(price_monthly>=0),
+  payment_url text,
   max_professionals integer,
   max_team_members integer,
   features jsonb not null default '{}'::jsonb,

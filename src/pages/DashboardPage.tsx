@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { CalendarCheck2, CircleDollarSign, Clock3, Radio, Scissors, TrendingUp, UserRound, Users } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { AdminSidebar } from '../components/AdminSidebar'
+import { SubscriptionNotice } from '../components/SubscriptionNotice'
 import { supabase } from '../lib/supabase'
 import type { Appointment, Business } from '../types'
 
@@ -29,6 +30,7 @@ export function DashboardPage(){
  if(loading)return <div className="center-screen">Carregando dashboard...</div>;if(!business)return null
  return <main className="admin-page"><AdminSidebar businessName={business.name} current="dashboard"/><section className="admin-content advanced-page">
   <div className="admin-head"><div><span className="eyebrow">VISÃO EXECUTIVA</span><h1>Dashboard</h1><div className="live-row"><span className={`live-badge ${live?'online':'connecting'}`}><Radio size={14}/>{live?'Dados ao vivo':'Conectando...'}</span></div></div><button className="button button-primary" onClick={()=>navigate('/painel')}><CalendarCheck2 size={16}/>Abrir agenda</button></div>
+  <SubscriptionNotice businessId={business.id}/>
   <div className="advanced-kpis">
    <article><CircleDollarSign/><small>Faturamento do mês</small><strong>{money(revenue)}</strong><span>{completed.length} atendimentos concluídos</span></article>
    <article><TrendingUp/><small>Resultado estimado</small><strong>{money(net)}</strong><span>Despesas: {money(expenses)}</span></article>
