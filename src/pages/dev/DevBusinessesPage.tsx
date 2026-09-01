@@ -41,26 +41,79 @@ export function DevBusinessesPage(){
   function billingWhatsAppUrl(b:Row){
     const number=whatsappNumber(b.phone)
     if(!number)return ''
+
     const price=money(Number(b.plan_price_monthly||80))
-    const due=b.current_period_ends_at?dateOnly(b.current_period_ends_at):null
     const payment=b.payment_url||'https://mpago.la/2tn4qBx'
-    const lines=[
+    const dueDate=b.current_period_ends_at?new Date(b.current_period_ends_at):null
+    const now=new Date()
+    const today=new Date(now.getFullYear(),now.getMonth(),now.getDate())
+    const due=dueDate?dateOnly(b.current_period_ends_at):null
+    const dueDay=dueDate?new Date(dueDate.getFullYear(),dueDate.getMonth(),dueDate.getDate()):null
+    const daysUntilDue=dueDay?Math.ceil((dueDay.getTime()-today.getTime())/86400000):null
+
+    const overdue=b.subscription_status==='past_due'||b.subscription_status==='inactive'||(daysUntilDue!==null&&daysUntilDue<0)
+    const dueSoon=!overdue&&daysUntilDue!==null&&daysUntilDue>=0&&daysUntilDue<=5
+
+    const lines=overdue?[
+      `🔴 *Mensalidade pendente — BarberAgenda*`,
+      ``,
       `Olá! 👋 Tudo bem?`,
       ``,
-      `Este é um lembrete da mensalidade do BarberAgenda. ✂️📅`,
+      `Identificamos que sua mensalidade do BarberAgenda está pendente.`,
       ``,
-      `💳 Plano: ${b.plan_name||'Plano Profissional'}`,
-      `💰 Valor: ${price}/mês`,
-      ...(due?[`📅 Vencimento: ${due}`]:[]),
+      `📦 *Plano:* ${b.plan_name||'Plano Profissional'}`,
+      `💰 *Valor:* ${price}/mês`,
+      ...(due?[`📅 *Vencimento:* ${due}`]:[]),
       ``,
-      `Para manter seu acesso ao sistema em dia, realize o pagamento pelo link:`,
-      payment,
+      `⚠️ Regularize o pagamento para manter seu acesso ao BarberAgenda normalmente.`,
       ``,
-      `Após o pagamento, envie o comprovante por aqui. ✅`,
+      `💳 *Pagamento:*`,
+      `🔗 ${payment}`,
       ``,
-      `Obrigado por utilizar o BarberAgenda!`
+      `📸 Depois do pagamento, envie o comprovante por aqui.`,
+      ``,
+      `✅ Assim que confirmarmos, sua mensalidade ficará regularizada.`,
+      ``,
+      `✂️ Obrigado por utilizar o BarberAgenda! 💈📅🚀`
+    ]:dueSoon?[
+      `🟡 *Lembrete de mensalidade — BarberAgenda*`,
+      ``,
+      `Olá! 👋 Tudo bem?`,
+      ``,
+      `Sua mensalidade do BarberAgenda vence em breve.`,
+      ``,
+      `📦 *Plano:* ${b.plan_name||'Plano Profissional'}`,
+      `💰 *Valor:* ${price}/mês`,
+      ...(due?[`📅 *Vencimento:* ${due}`]:[]),
+      ``,
+      `💳 Você já pode realizar o pagamento pelo link abaixo:`,
+      `🔗 ${payment}`,
+      ``,
+      `📲 Após o pagamento, envie o comprovante por aqui.`,
+      ``,
+      `💈 Obrigado por fazer parte do BarberAgenda! ✂️🚀`
+    ]:[
+      `👋 Olá! Tudo bem?`,
+      ``,
+      `💈 Este é um lembrete da sua mensalidade do *BarberAgenda*.`,
+      ``,
+      `📦 *Plano:* ${b.plan_name||'Plano Profissional'}`,
+      `💰 *Valor:* ${price}/mês`,
+      ...(due?[`📅 *Vencimento:* ${due}`]:[]),
+      ``,
+      `🚨 Para manter seu acesso ao sistema ativo e continuar utilizando todos os recursos, realize o pagamento pelo link abaixo:`,
+      ``,
+      `🔗 ${payment}`,
+      ``,
+      `📲 Após o pagamento, envie o comprovante por aqui.`,
+      ``,
+      `✅ Assim que confirmarmos, sua mensalidade fica regularizada.`,
+      ``,
+      `✂️ Obrigado por utilizar o BarberAgenda! 🚀`
     ]
-    return `https://wa.me/${number}?text=${encodeURIComponent(lines.join('\n'))}`
+
+    return `https://wa.me/${number}?text=${encodeURIComponent(lines.join('
+'))}`
   }
 
   function sendBillingWhatsApp(b:Row){
