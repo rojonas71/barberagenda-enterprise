@@ -88,6 +88,7 @@ export type ClientSummary = {
   days_since_last: number | null
   favorite_service_name: string | null
   favorite_professional_name: string | null
+  last_contact_at: string | null
   updated_at: string
 }
 

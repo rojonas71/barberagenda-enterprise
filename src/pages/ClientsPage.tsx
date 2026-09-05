@@ -8,6 +8,10 @@ import {
   DollarSign,
   Download,
   Filter,
+  Copy,
+  MessageCircle,
+  Wifi,
+  WifiOff,
   LogOut,
   Mail,
   Phone,
@@ -32,6 +36,7 @@ import {
 import { useNavigate } from 'react-router-dom'
 import { AdminSidebar } from '../components/AdminSidebar'
 import { supabase } from '../lib/supabase'
+import { getPendingOfflineCount } from '../lib/offline'
 import type { Business, ClientHistoryItem, ClientNote, ClientSummary } from '../types'
 
 const money = (value: number | string | null | undefined) =>
@@ -51,7 +56,7 @@ const statusLabel: Record<string, string> = {
   no_show: 'Não compareceu'
 }
 
-type SegmentFilter = 'all' | 'vip' | 'recurring' | 'new' | 'inactive' | 'no_show' | 'birthday' | 'blocked'
+type SegmentFilter = 'all' | 'vip' | 'recurring' | 'new' | 'inactive30' | 'inactive60' | 'inactive90' | 'no_show' | 'birthday' | 'blocked'
 type SortOption = 'recent' | 'name' | 'spent' | 'visits' | 'inactive'
 
 type ClientForm = {
@@ -98,6 +103,27 @@ function isBirthdayMonth(client: ClientSummary) {
 }
 
 
+function reactivationMessage(client: ClientSummary) {
+  const firstName = client.name.trim().split(/\s+/)[0] || client.name
+  return [
+    `Olá, ${firstName}! 👋`,
+    ``,
+    `💈 Passando para saber como você está.`,
+    `Já faz um tempinho desde seu último atendimento no BarberAgenda.`,
+    ``,
+    `✂️ Se quiser, posso te ajudar a marcar seu próximo horário.`,
+    ``,
+    `📅 Me chama por aqui e combinamos o melhor dia e horário.`
+  ].join('\n')
+}
+
+function whatsappUrl(client: ClientSummary) {
+  const digits = client.phone.replace(/\D/g, '')
+  const number = digits.startsWith('55') ? digits : `55${digits}`
+  return `https://wa.me/${number}?text=${encodeURIComponent(reactivationMessage(client))}`
+}
+
+
 export function ClientsPage() {
   const navigate = useNavigate()
   const [business, setBusiness] = useState<Business | null>(null)
@@ -116,6 +142,8 @@ export function ClientsPage() {
   const [noteSaving, setNoteSaving] = useState(false)
   const [feedback, setFeedback] = useState('')
   const [realtimeConnected, setRealtimeConnected] = useState(false)
+  const [online, setOnline] = useState(() => typeof navigator === 'undefined' ? true : navigator.onLine)
+  const [pendingOffline, setPendingOffline] = useState(0)
 
   useEffect(() => {
     async function loadSession() {
@@ -145,6 +173,37 @@ export function ClientsPage() {
 
     loadSession()
   }, [navigate])
+
+  useEffect(() => {
+    const refreshPending = async () => setPendingOffline(await getPendingOfflineCount())
+    void refreshPending()
+
+    const handleOnline = () => {
+      setOnline(true)
+      void refreshPending()
+    }
+    const handleOffline = () => setOnline(false)
+    const handleQueue = () => void refreshPending()
+    const handleSync = (event: Event) => {
+      const detail = (event as CustomEvent<{ syncing: boolean; synced?: number }>).detail
+      void refreshPending()
+      if (!detail?.syncing && (detail?.synced || 0) > 0) {
+        setFeedback(`${detail?.synced || 0} alteração(ões) do CRM sincronizada(s).`)
+      }
+    }
+
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+    window.addEventListener('barberagenda:offline-queue', handleQueue)
+    window.addEventListener('barberagenda:offline-sync', handleSync)
+
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
+      window.removeEventListener('barberagenda:offline-queue', handleQueue)
+      window.removeEventListener('barberagenda:offline-sync', handleSync)
+    }
+  }, [])
 
   const loadClients = useCallback(async () => {
     if (!business) return
@@ -245,6 +304,7 @@ export function ClientsPage() {
 
     setSaving(true)
     setFeedback('')
+    const nowIso = new Date().toISOString()
     const payload = {
       business_id: business.id,
       name: form.name.trim(),
@@ -257,16 +317,53 @@ export function ClientsPage() {
       notes: form.notes.trim() || null,
       marketing_opt_in: form.marketing_opt_in,
       blocked: form.blocked,
-      updated_at: new Date().toISOString()
+      updated_at: nowIso
     }
 
     if (creating) {
-      const { data, error } = await supabase.from('clients').insert(payload).select('id').single()
+      const clientId = crypto.randomUUID()
+      const { data, error } = await supabase.from('clients').insert({ id: clientId, ...payload }).select('id').single()
       setSaving(false)
       if (error) {
         setFeedback(error.code === '23505' ? 'Já existe um cliente com este telefone.' : `Erro ao criar cliente: ${error.message}`)
         return
       }
+
+      if (!online) {
+        const optimistic: ClientSummary = {
+          id: clientId,
+          name: payload.name,
+          phone: payload.phone,
+          email: payload.email,
+          notes: payload.notes,
+          birthday: payload.birthday,
+          tags: payload.tags,
+          source: payload.source,
+          marketing_opt_in: payload.marketing_opt_in,
+          blocked: payload.blocked,
+          total_appointments: 0,
+          completed_appointments: 0,
+          cancelled_appointments: 0,
+          no_show_appointments: 0,
+          total_spent: 0,
+          average_ticket: 0,
+          first_appointment_date: null,
+          last_appointment_date: null,
+          next_appointment_date: null,
+          days_since_last: null,
+          favorite_service_name: null,
+          favorite_professional_name: null,
+          last_contact_at: null,
+          updated_at: nowIso
+        }
+        setClients(current => [optimistic, ...current])
+        setSelected(optimistic)
+        fillForm(optimistic)
+        setCreating(false)
+        setFeedback('📴 Cliente salvo neste dispositivo. Será sincronizado automaticamente quando a internet voltar.')
+        return
+      }
+
       await loadClients()
       setCreating(false)
       setFeedback('Cliente criado com sucesso.')
@@ -285,6 +382,26 @@ export function ClientsPage() {
       setFeedback(error.code === '23505' ? 'Este telefone já pertence a outro cliente.' : `Erro ao salvar: ${error.message}`)
       return
     }
+    if (!online && selected) {
+      const optimistic: ClientSummary = {
+        ...selected,
+        name: payload.name,
+        phone: payload.phone,
+        email: payload.email,
+        notes: payload.notes,
+        birthday: payload.birthday,
+        tags: payload.tags,
+        source: payload.source,
+        marketing_opt_in: payload.marketing_opt_in,
+        blocked: payload.blocked,
+        updated_at: nowIso
+      }
+      setClients(current => current.map(item => item.id === selected.id ? optimistic : item))
+      setSelected(optimistic)
+      setFeedback('📴 Alteração salva offline. O CRM sincronizará quando a conexão voltar.')
+      return
+    }
+
     setFeedback('Dados do cliente atualizados.')
     await loadClients()
   }
@@ -304,8 +421,41 @@ export function ClientsPage() {
       setFeedback(`Não foi possível adicionar a nota: ${error.message}`)
       return
     }
+    const content = newNote.trim()
     setNewNote('')
+    if (!online) {
+      setClientNotes(current => [{
+        id: crypto.randomUUID(),
+        business_id: business.id,
+        client_id: selected.id,
+        content,
+        created_by: null,
+        created_at: new Date().toISOString()
+      }, ...current])
+      setFeedback('📴 Nota salva offline e adicionada à fila de sincronização.')
+      return
+    }
     await loadClientDetails(selected.id)
+  }
+
+  async function registerContact() {
+    if (!selected) return
+    const now = new Date().toISOString()
+    const { error } = await supabase.from('clients').update({ last_contact_at: now, updated_at: now }).eq('id', selected.id)
+    if (error) {
+      setFeedback(`Não foi possível registrar o contato: ${error.message}`)
+      return
+    }
+    const next = { ...selected, last_contact_at: now, updated_at: now }
+    setSelected(next)
+    setClients(current => current.map(item => item.id === selected.id ? next : item))
+    setFeedback(online ? 'Contato registrado no CRM.' : '📴 Contato registrado offline e aguardando sincronização.')
+  }
+
+  async function copyReactivationMessage() {
+    if (!selected) return
+    await navigator.clipboard.writeText(reactivationMessage(selected))
+    setFeedback('Mensagem de reativação copiada.')
   }
 
   async function deleteClient() {
@@ -345,7 +495,9 @@ export function ClientsPage() {
       if (segment === 'vip') return Number(client.total_spent) >= 500 || Number(client.completed_appointments) >= 8
       if (segment === 'recurring') return Number(client.completed_appointments) >= 3
       if (segment === 'new') return Number(client.total_appointments) <= 1
-      if (segment === 'inactive') return (client.days_since_last ?? 0) > 60 && !client.next_appointment_date
+      if (segment === 'inactive30') return (client.days_since_last ?? 0) > 30 && !client.next_appointment_date
+      if (segment === 'inactive60') return (client.days_since_last ?? 0) > 60 && !client.next_appointment_date
+      if (segment === 'inactive90') return (client.days_since_last ?? 0) > 90 && !client.next_appointment_date
       if (segment === 'no_show') return Number(client.no_show_appointments) > 0
       if (segment === 'birthday') return isBirthdayMonth(client)
       if (segment === 'blocked') return client.blocked
@@ -378,7 +530,7 @@ export function ClientsPage() {
 
   function exportCsv() {
     const rows = [
-      ['Nome', 'Telefone', 'Email', 'Aniversario', 'Tags', 'Visitas concluidas', 'No-show', 'Total gasto', 'Ticket medio', 'Ultima visita', 'Proximo horario', 'Origem', 'Marketing', 'Bloqueado'],
+      ['Nome', 'Telefone', 'Email', 'Aniversario', 'Tags', 'Visitas concluidas', 'No-show', 'Total gasto', 'Ticket medio', 'Ultima visita', 'Proximo horario', 'Ultimo contato CRM', 'Origem', 'Marketing', 'Bloqueado'],
       ...filtered.map(client => [
         client.name,
         client.phone,
@@ -391,6 +543,7 @@ export function ClientsPage() {
         Number(client.average_ticket || 0).toFixed(2),
         client.last_appointment_date || '',
         client.next_appointment_date || '',
+        client.last_contact_at || '',
         client.source || '',
         client.marketing_opt_in ? 'sim' : 'nao',
         client.blocked ? 'sim' : 'nao'
@@ -420,11 +573,13 @@ export function ClientsPage() {
           <div>
             <span className="eyebrow">CRM PROFISSIONAL</span>
             <h1>Clientes</h1>
-            <div className="live-row">
-              <span className={`live-badge ${realtimeConnected ? 'online' : 'connecting'}`}>
-                <Radio size={14}/>{realtimeConnected ? 'CRM em tempo real' : 'Conectando...'}
+            <div className="live-row crm-connectivity-row">
+              <span className={`live-badge ${online && realtimeConnected ? 'online' : online ? 'connecting' : 'offline'}`}>
+                {online ? <Wifi size={14}/> : <WifiOff size={14}/>}
+                {online ? (realtimeConnected ? 'CRM online' : 'Online • conectando') : 'CRM offline'}
               </span>
-              <small>Histórico, relacionamento e fidelização em um só lugar</small>
+              {pendingOffline > 0 && <span className="crm-pending-badge">{pendingOffline} pendente{pendingOffline === 1 ? '' : 's'}</span>}
+              <small>{online ? 'Histórico, relacionamento e fidelização em um só lugar' : 'Você pode continuar trabalhando. As alterações serão sincronizadas depois.'}</small>
             </div>
           </div>
           <div className="crm-head-actions">
@@ -434,6 +589,14 @@ export function ClientsPage() {
         </div>
 
         {feedback && <div className="crm-feedback"><span>{feedback}</span><button onClick={() => setFeedback('')}><X size={15}/></button></div>}
+
+        {!online && (
+          <div className="crm-offline-banner">
+            <WifiOff size={18}/>
+            <div><strong>CRM funcionando sem internet</strong><small>Clientes já sincronizados continuam disponíveis. Cadastros, edições, notas e contatos ficam na fila até a conexão voltar.</small></div>
+            {pendingOffline > 0 && <span>{pendingOffline} alteração{pendingOffline === 1 ? '' : 'ões'}</span>}
+          </div>
+        )}
 
         <div className="stats-grid client-stats pro-client-stats">
           <article className="stat-card"><Users/><div><small>Total de clientes</small><strong>{clients.length}</strong></div></article>
@@ -451,7 +614,9 @@ export function ClientsPage() {
             <option value="vip">VIP</option>
             <option value="recurring">Recorrentes</option>
             <option value="new">Novos</option>
-            <option value="inactive">Inativos +60 dias</option>
+            <option value="inactive30">Inativos +30 dias</option>
+            <option value="inactive60">Inativos +60 dias</option>
+            <option value="inactive90">Inativos +90 dias</option>
             <option value="no_show">Com no-show</option>
             <option value="birthday">Aniversariantes do mês</option>
             <option value="blocked">Bloqueados</option>
@@ -511,9 +676,13 @@ export function ClientsPage() {
                 </div>
 
                 {selected && (
-                  <div className="client-actions-row client-actions-pro">
+                  <div className="client-actions-row client-actions-pro crm-contact-actions">
                     <a className="button button-ghost" href={`tel:${selected.phone.replace(/\D/g, '')}`}><Phone size={16}/>Ligar</a>
                     {selected.email && <a className="button button-ghost" href={`mailto:${selected.email}`}><Mail size={16}/>E-mail</a>}
+                    {online
+                      ? <a className="button button-ghost" href={whatsappUrl(selected)} target="_blank" rel="noreferrer"><MessageCircle size={16}/>Reativar no WhatsApp</a>
+                      : <button className="button button-ghost" onClick={copyReactivationMessage}><Copy size={16}/>Copiar mensagem</button>}
+                    <button className="button button-ghost" onClick={registerContact}><CheckCircle2 size={16}/>Registrar contato</button>
                   </div>
                 )}
 
@@ -585,6 +754,7 @@ export function ClientsPage() {
                       <span><CalendarDays size={14}/>Primeiro agendamento: <strong>{dateBR(selected.first_appointment_date)}</strong></span>
                       <span><Clock4 size={14}/>Última visita: <strong>{dateBR(selected.last_appointment_date)}</strong></span>
                       <span><CheckCircle2 size={14}/>Próximo: <strong>{dateBR(selected.next_appointment_date)}</strong></span>
+                      <span><MessageCircle size={14}/>Último contato CRM: <strong>{selected.last_contact_at ? dateTimeBR(selected.last_contact_at) : '—'}</strong></span>
                     </div>
                   </>
                 )}
