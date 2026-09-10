@@ -57,6 +57,7 @@ export type Appointment = {
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no_show'
   notes: string | null
   created_at: string
+  updated_at: string
   discount_amount?: number
   final_amount?: number | null
   payment_status?: 'unpaid' | 'paid' | 'refunded'
