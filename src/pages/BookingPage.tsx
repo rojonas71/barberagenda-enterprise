@@ -154,6 +154,13 @@ export function BookingPage() {
     })()
   }, [slug])
 
+  useEffect(() => {
+    if (!business) return
+    const previousTitle = document.title
+    document.title = `Agende seu horário — ${business.name}`
+    return () => { document.title = previousTitle }
+  }, [business])
+
   const loadAvailability = useCallback(async () => {
     if (!business || !professionalId || !date) {
       setBusyRanges([])

@@ -1,3 +1,7 @@
+# BarberAgenda 4.5.0
+
+**Link exclusivo por empresa + QR Code + Página Pública de Agendamento**
+
 # BarberAgenda Enterprise 4.0
 
 ## Versão 4.1.1
@@ -499,3 +503,24 @@ Os campos de contato usam **telefone**. Para bancos que receberam anteriormente 
 O Dev Console inclui módulos avançados de Empresas, Usuários, Planos, Suporte, Saúde e Configurações com KPIs, filtros, detalhes, exportação CSV e RBAC.
 
 Documentação: `ADMIN_DEV_ENTERPRISE.md`
+
+
+## 4.5.0 — Link público
+
+Cada empresa possui uma URL pública no formato:
+
+`/b/<slug>`
+
+No painel **Configurações**, a empresa pode:
+- editar o slug;
+- copiar o link;
+- compartilhar o link;
+- abrir a agenda pública;
+- visualizar o QR Code da agenda.
+
+A página pública mantém o fluxo de agendamento existente e usa o slug para carregar a empresa correta.
+
+Migration:
+`supabase/link-publico-v4.5.0.sql`
+
+> O QR Code é renderizado por serviço externo de geração de QR; ele contém somente a URL pública da empresa.

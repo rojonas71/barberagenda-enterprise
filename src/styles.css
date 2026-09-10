@@ -259,3 +259,13 @@ html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}body{overflow-x:hidden
 .crm-offline-banner>div{display:grid;gap:3px;flex:1}.crm-offline-banner strong{font-size:13px}.crm-offline-banner small{color:#d8b98f;line-height:1.45}.crm-offline-banner>span{padding:5px 8px;border-radius:999px;background:#4b351f;font-size:10px;font-weight:900;white-space:nowrap}
 .crm-contact-actions{flex-wrap:wrap}.crm-contact-actions .button{flex:1 1 145px}
 @media(max-width:720px){.crm-offline-banner{align-items:flex-start}.crm-offline-banner>span{display:none}.crm-contact-actions .button{flex:1 1 100%}}
+
+/* BarberAgenda 4.5.0 — Link exclusivo por empresa + QR Code */
+.public-booking-card{display:grid;grid-template-columns:190px minmax(0,1fr);gap:22px;align-items:center;padding:22px;border:1px solid rgba(74,226,161,.18);border-radius:20px;background:linear-gradient(135deg,rgba(8,27,38,.96),rgba(7,17,29,.96));box-shadow:0 16px 45px rgba(0,0,0,.14)}
+.public-booking-qr{width:180px;min-height:205px;display:grid;justify-items:center;align-content:center;gap:8px;padding:10px;border-radius:18px;background:#fff;color:#071522}
+.public-booking-qr img{display:block;width:160px;height:160px;object-fit:contain}
+.public-booking-qr span{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+.public-booking-info{display:grid;gap:8px}.public-booking-info h3{margin:0;font-size:20px}.public-booking-info p{margin:0;color:var(--muted,#9badbf);line-height:1.55;max-width:700px}
+.public-booking-url{padding:11px 13px;border:1px solid #203a51;border-radius:11px;background:#071521;color:#8ce7c1;font-size:13px;font-weight:700;word-break:break-all}
+.settings-actions.compact{margin-top:4px;gap:8px}.settings-actions.compact .button{min-height:40px}
+@media(max-width:760px){.public-booking-card{grid-template-columns:1fr;padding:16px}.public-booking-qr{justify-self:center}.settings-actions.compact{display:grid;grid-template-columns:1fr}.settings-actions.compact .button{width:100%;justify-content:center}}
